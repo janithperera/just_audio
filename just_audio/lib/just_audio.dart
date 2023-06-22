@@ -1254,7 +1254,9 @@ class AudioPlayer {
     final currentIndex = this.currentIndex;
     final audioSource = _audioSource;
 
-    if (!active && audioSource is LockCachingAudioSource && audioSource._downloading) {
+    if (!active &&
+        audioSource is LockCachingAudioSource &&
+        audioSource._downloading) {
       audioSource._downloading = false;
       audioSource._httpRequest?.close();
       audioSource._httpClient?.close(force: true);
@@ -2796,6 +2798,17 @@ class LockCachingAudioSource extends StreamAudioSource {
 
   Future<File> get _partialCacheFile async =>
       File('${(await cacheFile).path}.part');
+
+  /// Get temporary cache file (useful for live streams)
+  Future<File?> partialCacheFile() async {
+    final partialCacheFile = await _partialCacheFile;
+    if (partialCacheFile.existsSync()) {
+      final cacheFile = await this.cacheFile;
+      final extension = p.extension(cacheFile.path);
+      return partialCacheFile.copySync("${cacheFile.path.replaceAll(extension, '')}-tmp$extension");
+    }
+    return null;
+  }
 
   /// We use this to record the original content type of the downloaded audio.
   /// NOTE: We could instead rely on the cache file extension, but the original
