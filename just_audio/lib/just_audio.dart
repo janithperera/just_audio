@@ -1256,6 +1256,8 @@ class AudioPlayer {
 
     if (!active && audioSource is LockCachingAudioSource && audioSource._downloading) {
       audioSource._downloading = false;
+      audioSource._httpRequest?.close();
+      audioSource._httpClient?.close(force: true);
     }
 
     void subscribeToEvents(AudioPlayerPlatform platform) {
@@ -2724,10 +2726,13 @@ class LockCachingAudioSource extends StreamAudioSource {
   final Uri uri;
   final Map<String, String>? headers;
   final Future<File> cacheFile;
-  int _progress = 0;
   final _requests = <_StreamingByteRangeRequest>[];
   final _downloadProgressSubject = BehaviorSubject<double>();
+  int _progress = 0;
   bool _downloading = false;
+
+  HttpClient? _httpClient;
+  HttpClientRequest? _httpRequest;
 
   /// Creates a [LockCachingAudioSource] to that provides [uri] to the player
   /// while simultaneously caching it to [cacheFile]. If no cache file is
@@ -2826,11 +2831,11 @@ class LockCachingAudioSource extends StreamAudioSource {
     File getEffectiveCacheFile() =>
         partialCacheFile.existsSync() ? partialCacheFile : cacheFile;
 
-    final httpClient = _createHttpClient(userAgent: _player?._userAgent);
-    final httpRequest = await _getUrl(httpClient, uri, headers: headers);
-    final response = await httpRequest.close();
+    _httpClient = _createHttpClient(userAgent: _player?._userAgent);
+    _httpRequest = await _getUrl(_httpClient!, uri, headers: headers);
+    final response = await _httpRequest!.close();
     if (response.statusCode != 200) {
-      httpClient.close();
+      _httpClient!.close();
       throw Exception('HTTP Status Error: ${response.statusCode}');
     }
     (await _partialCacheFile).createSync(recursive: true);
@@ -2978,11 +2983,11 @@ class LockCachingAudioSource extends StreamAudioSource {
       }
       (await _partialCacheFile).renameSync(cacheFile.path);
       await subscription.cancel();
-      httpClient.close();
+      _httpClient!.close();
       _downloading = false;
     }, onError: (Object e, StackTrace stackTrace) async {
       (await _partialCacheFile).deleteSync();
-      httpClient.close();
+      _httpClient!.close();
       // Fail all pending requests
       for (final req in _requests) {
         req.fail(e, stackTrace);
