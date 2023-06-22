@@ -2800,10 +2800,11 @@ class LockCachingAudioSource extends StreamAudioSource {
       File('${(await cacheFile).path}.part');
 
   /// Get temporary cache file (useful for live streams)
-  Future<File?> partialCacheFile() async {
+  Future<File?> partialCacheFile(String? filePath) async {
     final partialCacheFile = await _partialCacheFile;
     if (partialCacheFile.existsSync()) {
-      return partialCacheFile.copySync("${(await this.cacheFile).path}-tmp.mp3");
+      return partialCacheFile
+          .copySync(filePath ?? "${(await this.cacheFile).path}-tmp.mp3");
     }
     return null;
   }
