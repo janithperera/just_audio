@@ -2803,9 +2803,7 @@ class LockCachingAudioSource extends StreamAudioSource {
   Future<File?> partialCacheFile() async {
     final partialCacheFile = await _partialCacheFile;
     if (partialCacheFile.existsSync()) {
-      final cacheFile = await this.cacheFile;
-      final extension = p.extension(cacheFile.path);
-      return partialCacheFile.copySync("${cacheFile.path.replaceAll(extension, '')}-tmp$extension");
+      return partialCacheFile.copySync("${(await this.cacheFile).path}-tmp.mp3");
     }
     return null;
   }
