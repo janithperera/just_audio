@@ -1,3 +1,8 @@
+## 0.10.0
+
+* Closed http connection on player stop for live streams (@Akalanka47000).
+* Added function to retrieve the partial cache file (@Akalanka47000).
+
 ## 0.9.35
 
 * Fix exception on calling LockCachingAudioSource clearCache after the player is stopped (@Akalanka47000).
