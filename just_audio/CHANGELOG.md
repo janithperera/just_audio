@@ -1,3 +1,7 @@
+## 0.10.1
+
+* Fixed IOS livestream position update (@Akalanka47000).
+
 ## 0.10.0
 
 * Closed http connection on player stop for live streams (@Akalanka47000).
