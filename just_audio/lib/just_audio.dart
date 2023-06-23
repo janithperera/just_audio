@@ -557,7 +557,7 @@ class AudioPlayer {
     if (playing && processingState == ProcessingState.ready) {
       final result = playbackEvent.updatePosition +
           (DateTime.now().difference(playbackEvent.updateTime)) * speed;
-      return playbackEvent.duration == null || result <= playbackEvent.duration!
+      return playbackEvent.duration == null || result <= playbackEvent.duration! || playbackEvent.duration == Duration.zero
           ? result
           : playbackEvent.duration!;
     } else {
