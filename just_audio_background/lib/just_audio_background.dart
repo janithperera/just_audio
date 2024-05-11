@@ -126,10 +126,14 @@ class _JustAudioBackgroundPlugin extends JustAudioPlatform {
   @override
   Future<AudioPlayerPlatform> init(InitRequest request) async {
     if (_player != null) {
-      throw PlatformException(
-          code: "error",
-          message:
-              "just_audio_background supports only a single player instance");
+      _player!.release();
+      disposeAllPlayers(DisposeAllPlayersRequest());
+      _player = null;
+
+      // throw PlatformException(
+      //     code: "error",
+      //     message:
+      //         "just_audio_background supports only a single player instance");
     }
     _player = _JustAudioPlayer(
       initRequest: request,
